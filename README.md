@@ -63,4 +63,7 @@ Anconda enviroment used in deployment
 ```bash
   streamlit run "filename"
 ```
+## Screenshot
+
+![DiabetesPrediction](https://user-images.githubusercontent.com/111685573/185799594-fa04c72c-0c55-476a-aacb-7087c7727b7b.png)
 
