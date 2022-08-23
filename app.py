@@ -1,82 +1,41 @@
-#!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug 23 14:25:07 2022
 
-# In[6]:
+@author: prach
+"""
 
-
-import numpy as np
+# Importing essential libraries
+from flask import Flask, render_template, request
 import pickle
-import streamlit as st
-import time
+import numpy as np
 
-loaded_model = pickle.load(open(r'C:\Users\prach\Downloads\Placement Diabetes detection Project\trained_dibetes_model.sav','rb'))
+# Load the Random Forest CLassifier model
+filename = 'trained_dibetes_model.pkl'
+classifier = pickle.load(open(filename, 'rb'))
 
+app = Flask(__name__)
 
-#creating the function to prediction
+@app.route('/')
+def home():
+	return render_template('index.html')
 
-def prediction(input_data):
-    
-    input_data_as_numpy_array = np.asarray(input_data)
-
-    #reshape the array as we are predicting for one instance
-    #our model is trained for 700+ elements
-    input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
-
-    prediction = loaded_model.predict(input_data_reshaped)
-
-    if (prediction[0]==0):
-        return 'Not diabetic'
-    else:
-        return 'Diabetic!'
-
-
-def main():
-
-    #giving the title for webpage
-    st.title('Diabetes Prediction')
-    st.write("Enter examined details:")
-
-    #getting the input data from the user
-
-    Pregnancies = st.text_input('Number of Pregnancies')
-    Glucose = st.text_input('Blood-Glucose level')       
-    BloodPressure = st.text_input('Blood Pressure level')    
-    SkinThickness = st.text_input('Skin Thickness value')   
-    Insulin = st.text_input('Insulin level')   
-    BMI = st.text_input('BMI value')   
-    DiabetesPedigreeFunction = st.text_input('Diabetes Pedigree Function value')   
-    Age = st.text_input('Age of the Person')   
-
-    #code for prediction
-    diagnosis = ''
-
-    #creating a button for prediction
-    if st.button('Test'):
-        diagnosis = prediction([Pregnancies,Glucose,BloodPressure,SkinThickness,
-        Insulin,BMI,DiabetesPedigreeFunction,Age])
-
-    # st.warning(diagnosis)
-    # st.balloons()
-        st.balloons()
-
-    if(diagnosis!="Diabetic!"):
-        st.info(diagnosis)
-    else:
-        st.error(diagnosis)
+@app.route('/predict', methods=['POST'])
+def predict():
+    if request.method == 'POST':
+        preg = int(request.form['pregnancies'])
+        glucose = int(request.form['glucose'])
+        bp = int(request.form['bloodpressure'])
+        st = int(request.form['skinthickness'])
+        insulin = int(request.form['insulin'])
+        bmi = float(request.form['bmi'])
+        dpf = float(request.form['dpf'])
+        age = int(request.form['age'])
         
-
-
+        data = np.array([[preg, glucose, bp, st, insulin, bmi, dpf, age]])
+        my_prediction = classifier.predict(data)
+        
+        return render_template('result.html', prediction=my_prediction)
 
 if __name__ == '__main__':
-    main()
-
-#open anaconda
-# go to  environments and run with terminal
-#type  streamlit run "path for this file with same backslash"
-
-
-# In[ ]:
-
-
-
-
+	app.run(debug=True)
